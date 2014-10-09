@@ -637,7 +637,6 @@ class Mustache_Engine
             } else {
                 throw new Mustache_Exception_UnknownTemplateException($name);
             }
-
             return $this->loadSource($loader->load($name));
         } catch (Mustache_Exception_UnknownTemplateException $e) {
             // If the named partial cannot be found, log then return null.

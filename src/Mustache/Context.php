@@ -183,6 +183,13 @@ class Mustache_Context
                             return $frame->$id();
                         }
 
+                        if ($frame instanceof \RedBeanPHP\OODBBean) {
+                            $model = $frame->box();
+                            if (method_exists($model, $id)) {
+                                return $model->$id();
+                            }
+                        }
+
                         if (isset($frame->$id)) {
                             return $frame->$id;
                         }

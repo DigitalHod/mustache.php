@@ -118,9 +118,8 @@ abstract class Mustache_Template
                 return $value instanceof Traversable;
 
             case 'array':
-                $i = 0;
                 foreach ($value as $k => $v) {
-                    if ($k !== $i++) {
+                    if (!($v instanceof ArrayAccess || is_array($v))) {
                         return false;
                     }
                 }

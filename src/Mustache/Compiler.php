@@ -413,12 +413,22 @@ class Mustache_Compiler
         } else {
             $indentParam = '';
         }
-
-        return sprintf(
-            $this->prepare(self::PARTIAL, $level),
-            var_export($id, true),
-            $indentParam
-        );
+        if (false !== strpos($id, '.')) {
+            if (0 === strpos($id, '.')) {
+                $id = substr($id, 1);
+            }
+            $id = $this->variable($id, [], false, $level, true);
+            return sprintf(self::PARTIAL,
+                $id,
+                ' '
+            );
+        } else {
+            return sprintf(
+                $this->prepare(self::PARTIAL, $level),
+                var_export($id, true),
+                $indentParam
+            );
+        }
     }
 
     const PARENT = '
@@ -470,6 +480,10 @@ class Mustache_Compiler
         $buffer .= %s%s;
     ';
 
+    const VARIABLE_DECL = '
+        $this->resolveValue($context->%s(%s), $context, $indent)
+    ';
+
     /**
      * Generate Mustache Template variable interpolation PHP source.
      *
@@ -477,17 +491,18 @@ class Mustache_Compiler
      * @param string[] $filters Array of filters
      * @param boolean  $escape  Escape the variable value for output?
      * @param int      $level
+     * @param boolean  $declarationOnly Provide raw variable without ;, buffer etc?
      *
      * @return string Generated variable interpolation PHP source
      */
-    private function variable($id, $filters, $escape, $level)
+    private function variable($id, $filters, $escape, $level, $declarationOnly = false)
     {
         $method  = $this->getFindMethod($id);
         $id      = ($method !== 'last') ? var_export($id, true) : '';
         $filters = $this->getFilters($filters, $level);
         $value   = $escape ? $this->getEscape() : '$value';
 
-        return sprintf($this->prepare(self::VARIABLE, $level), $method, $id, $filters, $this->flushIndent(), $value);
+        return sprintf($this->prepare($declarationOnly ? self::VARIABLE_DECL : self::VARIABLE, $level), $method, $id, $filters, $this->flushIndent(), $value);
     }
 
     const FILTER = '
